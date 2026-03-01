@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFlow.ai</title>
+    
+    <link rel="icon" href="https://ui-avatars.com/api/?name=DF&background=8b5cf6&color=fff&rounded=true&bold=true" type="image/x-icon">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: false, theme: 'dark' });</script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: #050810;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 50%);
+            color: #ffffff; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        
+        .glass-panel { background: rgba(13, 17, 28, 0.6); backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
+        .input-field { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); transition: all 0.3s ease; color: #e2e8f0; }
+        .input-field:focus { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.25); background: rgba(15, 10, 30, 0.6); outline: none; }
+        .btn-magic { background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); transition: all 0.3s ease; }
+        .btn-magic:hover { transform: scale(1.02); box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+
+        .md-preview h1 { font-size: 1.8em; font-weight: 800; margin-bottom: 0.5em; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.2em; color: #fff;}
+        .md-preview h2 { font-size: 1.4em; font-weight: 700; margin-top: 1em; margin-bottom: 0.5em; color: #e2e8f0;}
+        .md-preview p { margin-bottom: 1em; line-height: 1.7; color: #94a3b8; font-size: 0.95em;}
+        .md-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; color: #94a3b8;}
+        .md-preview pre { background-color: #0d1117; padding: 1.2em; border-radius: 12px; overflow-x: auto; margin-bottom: 1em; border: 1px solid rgba(255,255,255,0.05); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);}
+        .md-preview p code, .md-preview li code { background-color: rgba(139, 92, 246, 0.15); padding: 0.2em 0.4em; border-radius: 6px; color: #c084fc; font-family: monospace; font-size: 0.9em; border: 1px solid rgba(139, 92, 246, 0.2);}
+        
+        .btn-custom { font-weight: bold; border-radius: 0.5rem; padding: 0.75rem; width: 100%; transition: all 0.3s; color: white; cursor: pointer;}
+        .btn-custom:hover { transform: translateY(-2px); }
+        .brand-glow { text-shadow: 0 0 20px rgba(139, 92, 246, 0.6); }
+        .premium-form-bg { background: linear-gradient(145deg, rgba(30, 27, 75, 0.4) 0%, rgba(15, 23, 42, 0.6) 100%); border: 1px solid rgba(139, 92, 246, 0.2); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 10px 30px rgba(0,0,0,0.5); }
+        
+        #chatBox::-webkit-scrollbar { width: 4px; }
+        #chatBox::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        .chat-md p:last-child { margin-bottom: 0; }
+        .mermaid { display: flex; justify-content: center; background: #0d1117; padding: 20px; border-radius: 12px; overflow-x: auto; border: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <div id="mobileMenuOverlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden opacity-0 transition-opacity duration-300"></div>
+
+    <aside id="mobileMenu" class="fixed top-0 left-0 h-full w-72 bg-[#0a0d14] border-r border-white/10 z-[100] transform -translate-x-full transition-transform duration-300 overflow-y-auto shadow-2xl flex flex-col">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-gradient-to-br from-violet-600 to-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center shadow-[0_0_10px_rgba(139,92,246,0.5)]">
+                    <i class="fas fa-layer-group text-white text-sm"></i>
+                </div>
+                <span class="text-lg font-extrabold tracking-tight text-white brand-glow">DevFlow<span class="text-violet-400">.ai</span></span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-gray-400 hover:text-white text-xl"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div class="p-4 flex-grow space-y-1">
+            <div onclick="switchTabMobile('dashboard')" class="px-4 py-3 rounded-xl text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center gap-3"><i class="fas fa-home w-5 text-violet-400"></i> Dashboard (Free)</div>
+            <div onclick="switchTabMobile('chat')" class="px-4 py-3 rounded-xl text-sm font-bold text-gray-300 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center gap-3"><i class="fas fa-comments w-5 text-teal-400"></i> AI Chatbot</div>
+            
+            <div class="pt-4 pb-2 px-4 text-[10px] font-extrabold tracking-widest text-yellow-500 uppercase flex items-center"><i class="fas fa-lock mr-2"></i> Pro Tools</div>
+            <div onclick="switchTabMobile('protools')" class="px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center gap-3">All Pro Tools</div>
+            
+            <div class="pt-4 pb-2 px-4 text-[10px] font-extrabold tracking-widest text-red-500 uppercase flex items-center"><i class="fas fa-lock mr-2"></i> Ultra Features</div>
+            <div onclick="switchTabMobile('ultra')" class="px-4 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-all cursor-pointer flex items-center gap-3">All Ultra Tools</div>
+        </div>
+        
+        <div class="p-6 border-t border-white/10" id="mobileMenuUpgradeContainer">
+            <button onclick="showModal('billingModal'); toggleMobileMenu()" class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-all"><i class="fas fa-crown mr-2 text-yellow-400"></i> Upgrade Plan</button>
+        </div>
+    </aside>
+
+    <nav class="fixed top-0 w-full flex justify-between items-center px-4 md:px-8 py-3 md:py-4 border-b border-white/5 bg-[#050810]/90 backdrop-blur-xl z-50 shadow-md">
+        <div class="flex items-center gap-4 md:gap-10">
+            <button onclick="toggleMobileMenu()" class="block lg:hidden text-gray-300 hover:text-white text-xl p-2 cursor-pointer transition-transform hover:scale-110">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="flex items-center gap-2 cursor-pointer group" onclick="switchTab('dashboard')">
+                <div class="bg-gradient-to-br from-violet-600 to-indigo-600 w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.5)] group-hover:shadow-[0_0_25px_rgba(139,92,246,0.8)] transition-all">
+                    <i class="fas fa-layer-group text-white text-lg md:text-xl"></i>
+                </div>
+                <div class="leading-none">
+                    <span class="text-xl md:text-2xl font-extrabold tracking-tight text-white brand-glow">DevFlow<span class="text-violet-400">.ai</span></span>
+                    <p class="text-[8px] md:text-[9px] text-gray-400 font-mono uppercase tracking-widest mt-1 hidden sm:block">Workspace Mode</p>
+                </div>
+            </div>
+            
+            <div class="hidden lg:flex gap-8 text-xs font-bold tracking-widest text-gray-400 items-center ml-4">
+                <div onclick="switchTab('dashboard')" id="nav-dashboard" class="text-white border-b-2 border-violet-500 pb-1 cursor-pointer hover:text-white transition-all">DASHBOARD</div>
+                <div onclick="switchTab('chat')" id="nav-chat" class="cursor-pointer hover:text-blue-400 transition-all flex items-center gap-1"><i class="fas fa-comments text-blue-500"></i> AI CHAT</div>
+                <div onclick="switchTab('protools')" id="nav-protools" class="hover:text-yellow-400 transition-all flex items-center gap-1 cursor-pointer">PRO TOOLS</div>
+                <div onclick="switchTab('ultra')" id="nav-ultra" class="hover:text-red-400 transition-all flex items-center gap-1 font-extrabold cursor-pointer">ULTRA</div>
+                <a href="javascript:void(0)" onclick="showModal('billingModal')" class="hover:text-white transition-all">PRICING</a>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-5">
+            <div class="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-900/40 to-violet-900/40 border border-blue-500/30 px-4 py-1.5 rounded-full cursor-pointer" onclick="showModal('billingModal')">
+                <i class="fas fa-bolt text-yellow-400 text-sm"></i>
+                <span class="text-xs font-bold text-gray-200"><span id="creditCount">1000</span> <span id="creditLabel" class="text-gray-500 font-normal">Daily Limits</span></span>
+            </div>
+
+            <button id="upgradeBtnNav" onclick="showModal('billingModal')" class="flex items-center gap-2 cursor-pointer bg-gradient-to-r from-yellow-500 to-orange-500 text-black px-4 py-1.5 rounded-full font-bold text-xs hover:scale-105 transition-transform shadow-lg">
+                <i class="fas fa-crown"></i> <span class="hidden sm:inline">Upgrade</span>
+            </button>
+            
+            <div id="loginBtnNav" onclick="resetAndShowAuth()" class="flex items-center gap-2 cursor-pointer bg-white text-black px-4 py-1.5 rounded-full font-bold text-xs hover:bg-gray-200 transition-all">
+                <i class="fas fa-user"></i> <span class="hidden sm:inline">Sign In</span>
+            </div>
+
+            <div id="profileBtnNav" onclick="showModal('accountModal')" class="hidden items-center gap-2 cursor-pointer group bg-white/5 px-2 md:px-3 py-1.5 rounded-full border border-white/10 hover:bg-white/10 transition-all" title="Workspace Settings">
+                <div class="w-7 h-7 md:w-6 md:h-6 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+                    <img src="https://ui-avatars.com/api/?name=User&background=000&color=fff" id="navProfilePic" class="w-full h-full rounded-full object-cover" alt="Profile">
+                </div>
+                <span id="navUserStatus" class="text-xs font-semibold text-violet-400 hidden md:block">Account</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="h-20 md:h-24"></div>
+
+    <div id="header-title" class="text-center py-6 animate-fade-in relative z-10 px-4">
+        <div class="absolute inset-0 flex justify-center items-center pointer-events-none opacity-20">
+            <div class="w-full max-w-[600px] h-[100px] bg-purple-600 blur-[100px] rounded-full"></div>
+        </div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-900/30 border border-purple-500/30 text-[10px] font-bold text-purple-300 mb-3 tracking-widest uppercase">
+            <i class="fas fa-bolt text-yellow-400"></i> Powered by Gemini 2.5 Flash
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+            DevFlow <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">AI</span>
+        </h1>
+        <p class="text-gray-400 text-sm font-light max-w-xl mx-auto">AI Documentation Suite: Premium Code READMEs, Persuasive Proposals & Specs.</p>
+    </div>
+
+    <div class="flex-grow flex flex-col w-full relative">
+        
+        <main id="view-dashboard" class="max-w-[1600px] w-full mx-auto p-4 md:p-8 flex flex-col xl:flex-row gap-8 pb-10 animate-fade-in">
+            <section class="w-full xl:w-5/12 flex flex-col">
+                <div class="premium-form-bg rounded-3xl p-6 md:p-8 flex flex-col flex-grow relative overflow-hidden">
+                    <div class="space-y-6 relative z-10 flex-grow">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 uppercase mb-2">Project Name</label>
+                            <input id="pName" type="text" placeholder="e.g. NextGen E-commerce" class="w-full input-field rounded-xl p-3.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 uppercase mb-2">Tech Stack</label>
+                            <input id="pStack" type="text" placeholder="e.g. React, Node.js" class="w-full input-field rounded-xl p-3.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 uppercase mb-2">Core Features</label>
+                            <textarea id="pFeatures" rows="3" placeholder="Briefly describe what this project does..." class="w-full input-field rounded-xl p-3.5 text-sm resize-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-300 uppercase mb-2">Document Type</label>
+                            <select id="docType" class="w-full input-field rounded-xl p-3.5 text-sm cursor-pointer text-violet-300 font-semibold border-violet-500/30 bg-violet-900/10">
+                                <option value="GitHub README.md">🚀 Pro GitHub README.md</option>
+                                <option value="Client Proposal Document">💼 Client Proposal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="generateWithAI()" class="w-full btn-magic text-white font-extrabold py-4 rounded-xl mt-8 shadow-lg shadow-violet-500/20">INITIALIZE GENERATION</button>
+                </div>
+            </section>
+            <section class="w-full xl:w-7/12 flex flex-col">
+                <div class="glass-panel rounded-3xl flex flex-col flex-grow relative overflow-hidden min-h-[500px] xl:h-[600px]">
+                    <div class="bg-black/40 border-b border-white/5 px-4 py-3 flex items-center justify-between">
+                        <div class="flex gap-2"><div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div><div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div><div class="w-3 h-3 rounded-full bg-[#27c93f]"></div></div>
+                        <div class="text-[10px] font-mono text-gray-500">devflow-terminal ~ zsh</div>
+                        <div class="w-12 flex gap-2">
+                            <button onclick="downloadPDF()" class="text-gray-400 hover:text-red-400" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
+                            <button onclick="copyOutput(event)" class="text-gray-400 hover:text-white" title="Copy"><i class="fas fa-copy"></i></button>
+                        </div> 
+                    </div>
+                    <div id="loader" class="hidden absolute inset-0 bg-[#0b0f19]/90 z-10 flex flex-col justify-center items-center"><div class="w-16 h-16 border-4 border-t-violet-500 rounded-full animate-spin mb-4"></div><p class="text-xs tracking-widest text-violet-400 animate-pulse font-bold">COMPILING...</p></div>
+                    <div id="pdf-container" class="flex-grow overflow-y-auto p-6 md:p-8 bg-[#0a0d14]"><div id="outputPreview" class="md-preview h-full text-gray-600 font-mono italic flex items-center justify-center">Terminal standby...</div></div>
+                </div>
+            </section>
+        </main>
+        
+        <main id="view-chat" class="hidden w-full max-w-full px-2 md:px-6 py-2 flex flex-col h-[calc(100vh-80px)] md:h-[calc(100vh-110px)] animate-fade-in">
+            <div class="glass-panel flex-grow rounded-2xl md:rounded-3xl flex flex-col overflow-hidden border border-white/10 shadow-2xl relative mt-2 w-full max-w-[1600px] mx-auto">
+                <div class="bg-[#050810]/80 border-b border-white/5 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between z-10 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400 hidden sm:block"><i class="fas fa-robot text-xl"></i></div>
+                        <div>
+                            <h2 class="font-bold text-white text-lg leading-none">DevFlow Assistant</h2>
+                            <p class="text-[11px] text-green-400 mt-1 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online</p>
+                        </div>
+                    </div>
+                    <div><button onclick="clearChat()" class="text-xs font-bold text-gray-400 hover:text-white px-3 py-1.5 md:px-4 md:py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-all flex items-center gap-2"><i class="fas fa-trash-alt"></i> <span class="hidden sm:inline">Clear Chat</span></button></div>
+                </div>
+                
+                <div id="chatBox" class="flex-grow p-4 md:p-8 overflow-y-auto space-y-6 bg-[#0a0d14]">
+                    <div class="flex items-start gap-3 md:gap-4">
+                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg border border-white/20"><i class="fas fa-layer-group text-white text-xs md:text-sm"></i></div>
+                        <div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-3 md:p-4 max-w-[90%] md:max-w-[75%] text-sm text-gray-200 leading-relaxed shadow-lg">
+                            Hello! I am DevFlow AI.<br><br>I can help you write code, debug errors, prepare for interviews, or answer any technical questions. How can I assist you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-3 md:p-4 bg-[#050810] border-t border-white/10 flex flex-col gap-2 md:gap-3 w-full">
+                    <div class="flex gap-2 overflow-x-auto pb-1 max-w-[1600px] mx-auto w-full no-scrollbar">
+                        <button onclick="fillChat('Explain how React Hooks work')" class="whitespace-nowrap bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 px-3 py-1.5 rounded-full transition-all">Explain React Hooks</button>
+                        <button onclick="fillChat('Write a Python script to fetch an API')" class="whitespace-nowrap bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 px-3 py-1.5 rounded-full transition-all">Python API Script</button>
+                        <button onclick="fillChat('Optimize this code for me: ')" class="whitespace-nowrap bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-gray-300 px-3 py-1.5 rounded-full transition-all">Optimize Code</button>
+                    </div>
+                    <div class="max-w-[1600px] mx-auto flex items-end gap-2 md:gap-3 bg-[#0a0d14] border border-white/10 p-1.5 md:p-2 rounded-2xl focus-within:border-blue-500/50 transition-all shadow-inner w-full">
+                        <textarea id="chatInput" rows="1" class="flex-grow bg-transparent p-2 md:p-3 text-sm resize-none max-h-32 text-white outline-none" placeholder="Message DevFlow AI... (Press Enter to send)" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+                        <button onclick="sendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-lg transition-all shadow-lg flex-shrink-0 cursor-pointer mb-0.5 mr-0.5"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <main id="view-protools" class="hidden max-w-6xl w-full mx-auto p-4 md:p-6 pb-20 relative animate-fade-in">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-extrabold mb-2"><i class="fas fa-rocket text-blue-500 mr-3"></i>DevFlow <span class="text-blue-400">Pro Tools</span></h1>
+                <p class="text-gray-400 text-sm">Advanced Toolkit for Elite Developers</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <section class="glass-panel p-5 md:p-6 border-t-2 border-t-teal-500 rounded-2xl">
+                    <h2 class="text-xl font-bold mb-4"><i class="fas fa-language mr-2"></i>Code Translator</h2>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="langFrom" placeholder="From: e.g. Python" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                        <input type="text" id="langTo" placeholder="To: e.g. JavaScript" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                    </div>
+                    <textarea id="codeToTranslate" rows="4" class="w-full input-field rounded-lg mb-4 p-3" placeholder="Paste your code here..."></textarea>
+                    <button onclick="translateCode()" class="btn-custom bg-gradient-to-r from-teal-600 to-emerald-600 mb-2">Translate Code</button>
+                    <div id="translateOutput" class="md-preview text-sm text-gray-300 min-h-[10px]"></div>
+                </section>
+                
+                <section class="glass-panel p-5 md:p-6 border-t-2 border-t-red-500 rounded-2xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-shield-halved text-red-400 mr-2"></i> Security Auditor</h2>
+                    <textarea id="securityInput" rows="7" placeholder="Paste code to scan for vulnerabilities..." class="input-field mb-4 p-3 rounded-lg w-full font-mono text-sm text-red-100 bg-black/40"></textarea>
+                    <button onclick="generateSecurityAudit()" class="btn-custom bg-gradient-to-r from-red-600 to-rose-600 mb-2">Audit Code Security</button>
+                    <div id="securityOutput" class="md-preview text-sm text-gray-300 min-h-[10px]"></div>
+                </section>
+
+                <section class="glass-panel p-5 md:p-6 border-t-2 border-t-orange-500 rounded-2xl md:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-paper-plane text-orange-400 mr-3"></i> Postman Docs Generator</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="apiBaseUrl" placeholder="Base URL: e.g. https://api.myapp.com/v1" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                        <input type="text" id="apiAuth" placeholder="Auth: e.g. Bearer Token" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                    </div>
+                    <textarea id="apiEndpoints" rows="3" placeholder="Describe endpoints: e.g. GET /users, POST /login..." class="input-field mb-6 p-3 rounded-lg w-full text-white bg-black/40"></textarea>
+                    <button onclick="generatePostmanDocs()" class="btn-custom bg-gradient-to-r from-orange-600 to-red-600 mb-2 w-full md:w-auto md:px-10">Generate API Docs</button>
+                    <div id="postmanOutput" class="md-preview min-h-[10px] mt-4"></div>
+                </section>
+
+                <section class="glass-panel p-5 md:p-6 border-t-2 border-t-indigo-500 rounded-2xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-file-user text-indigo-400 mr-3"></i> AI Resume Builder</h2>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <input type="text" id="resRole" placeholder="Role: e.g. Frontend Dev" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                        <select id="resExp" class="input-field p-3 rounded-lg w-full text-gray-300 bg-black/40"><option value="College Fresher">Fresher</option><option value="Junior">Junior</option></select>
+                    </div>
+                    <input type="text" id="resSkills" placeholder="Skills: React, Node.js" class="input-field mb-4 p-3 rounded-lg w-full text-white bg-black/40">
+                    <textarea id="resProjects" rows="2" placeholder="Projects..." class="input-field mb-4 p-3 rounded-lg w-full text-white bg-black/40"></textarea>
+                    <button onclick="generateResume()" class="btn-custom bg-gradient-to-r from-indigo-600 to-purple-600 mb-2">Generate Resume</button>
+                    <div id="resumeOutput" class="md-preview min-h-[10px]"></div>
+                </section>
+
+                <section class="glass-panel p-5 md:p-6 border-t-2 border-t-yellow-500 rounded-2xl">
+                    <h2 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-user-tie text-yellow-400 mr-3"></i> AI Interview Prep</h2>
+                    <div class="grid grid-cols-1 gap-4 mb-4">
+                        <input type="text" id="intRole" placeholder="Target Role" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                        <input type="text" id="intCompany" placeholder="Company Name" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                    </div>
+                    <button onclick="generateInterview()" class="btn-custom bg-gradient-to-r from-yellow-600 to-orange-600 mb-2 mt-2 md:mt-14">Generate Prep Sheet</button>
+                    <div id="interviewOutput" class="md-preview min-h-[10px]"></div>
+                </section>
+            </div>
+        </main>
+
+        <main id="view-ultra" class="hidden flex-grow max-w-6xl w-full mx-auto p-4 md:p-6 pb-20 relative animate-fade-in">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-extrabold mb-2 bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent"><i class="fas fa-fire text-red-500 mr-3"></i>ULTRA FEATURES</h1>
+                <p class="text-gray-400 text-sm">Next-Generation AI Tools for God-Tier Developers.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-8 pb-10">
+                <section class="glass-panel p-6 md:p-8 border-t-4 border-t-blue-500 rounded-3xl relative overflow-hidden">
+                    <h2 class="text-xl md:text-2xl font-bold mb-4 flex items-center"><i class="fas fa-project-diagram text-blue-400 mr-3"></i> AI Flowchart Visualizer</h2>
+                    <input type="text" id="diagramTopic" placeholder="e.g. E-commerce Login Flow" class="input-field p-4 rounded-xl w-full text-white bg-black/40 mb-4 text-sm">
+                    <button onclick="generateDiagram()" class="btn-custom bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 w-full md:w-auto md:px-10">Generate Flowchart</button>
+                    <div id="diagramOutputContainer" class="hidden bg-[#0d1117] p-4 md:p-6 rounded-xl border border-white/10 overflow-x-auto w-full max-w-full">
+                        <div id="ultraDiagramOutput" class="flex justify-center text-gray-300"></div>
+                    </div>
+                </section>
+
+                <section class="glass-panel p-6 md:p-8 border-t-4 border-t-orange-500 rounded-3xl relative overflow-hidden">
+                    <h2 class="text-xl md:text-2xl font-bold mb-4 flex items-center"><i class="fas fa-database text-orange-400 mr-3"></i> Query Builder</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <select id="ultraDb" class="input-field p-3 rounded-lg w-full text-gray-300 bg-black/40"><option value="MySQL">MySQL / PostgreSQL</option><option value="MongoDB">MongoDB</option></select>
+                        <input type="text" id="ultraGoal" placeholder="e.g. Top 5 users by orders" class="input-field p-3 rounded-lg w-full text-white bg-black/40">
+                    </div>
+                    <textarea id="ultraSchema" rows="2" placeholder="Schema: Users(id, name)..." class="input-field mb-4 p-3 rounded-lg w-full text-white bg-black/40"></textarea>
+                    <button onclick="generateUltraSQL()" class="btn-custom bg-gradient-to-r from-orange-600 to-red-600 mb-6 w-full md:w-auto md:px-10">Generate Query</button>
+                    <div id="ultraSqlOutput" class="md-preview text-sm text-gray-300 min-h-[10px]"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="mt-auto relative z-10 border-t border-white/10 bg-gradient-to-b from-[#0a0d14] to-[#03050c] overflow-hidden">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-violet-500 to-transparent opacity-50"></div>
+
+        <div class="max-w-[1600px] mx-auto px-6 md:px-12 py-12 md:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 mb-12">
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-br from-violet-600 to-indigo-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)]"><i class="fas fa-layer-group text-white text-sm"></i></div>
+                        <span class="text-2xl font-extrabold text-white tracking-tight">DevFlow<span class="text-violet-400">.ai</span></span>
+                    </div>
+                    <p class="text-sm text-gray-400 leading-relaxed pr-4">The ultimate AI co-pilot for developers. Build architectures, write clean code, and debug faster than ever before. Welcome to the future of coding.</p>
+                    <div class="flex items-center gap-4 pt-2">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-violet-600 hover:text-white transition-all shadow-lg hover:-translate-y-1"><i class="fab fa-github text-lg"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-blue-500 hover:text-white transition-all shadow-lg hover:-translate-y-1"><i class="fab fa-linkedin-in text-lg"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-pink-500 hover:text-white transition-all shadow-lg hover:-translate-y-1"><i class="fab fa-instagram text-lg"></i></a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-5">
+                    <h4 class="text-white font-bold text-sm tracking-widest uppercase">Products</h4>
+                    <ul class="space-y-3 text-sm text-gray-500">
+                        <li><a href="javascript:void(0)" onclick="switchTab('dashboard', event)" class="hover:text-violet-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> AI Architect</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchTab('chat', event)" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> AI Chatbot</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchTab('protools', event)" class="hover:text-yellow-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> Pro Tools</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchTab('ultra', event)" class="hover:text-red-400 transition-colors flex items-center gap-2"><i class="fas fa-angle-right text-[10px]"></i> Ultra Features</a></li>
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-2 space-y-5">
+                    <h4 class="text-white font-bold text-sm tracking-widest uppercase">Resources</h4>
+                    <ul class="space-y-3 text-sm text-gray-500">
+                        <li><a href="javascript:void(0)" onclick="showModal('apiModal', event)" class="hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-code text-[10px]"></i> API Docs</a></li>
+                        <li><a href="javascript:void(0)" onclick="showModal('billingModal', event)" class="hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-tag text-[10px]"></i> Pricing</a></li>
+                        <li><a href="javascript:void(0)" onclick="showModal('tutorialModal', event)" class="hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-book text-[10px]"></i> Tutorials</a></li>
+                    </ul>
+                </div>
+
+                <div class="lg:col-span-4 space-y-5">
+                    <h4 class="text-white font-bold text-sm tracking-widest uppercase">Stay Updated</h4>
+                    <p class="text-sm text-gray-400">Get the latest AI developer tools & updates delivered to your inbox weekly.</p>
+                    <form action="https://formspree.io/f/mvoeydnd" method="POST" target="_blank" onsubmit="setTimeout(() => { this.reset(); showToast('Subscribed successfully! 🎉'); }, 1000)" class="flex gap-2 mt-2">
+                        <input type="email" name="email" required placeholder="Enter your email..." class="bg-black/50 border border-white/10 text-white text-sm rounded-xl px-4 py-3 w-full focus:outline-none focus:border-violet-500 transition-colors">
+                        <button type="submit" class="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg cursor-pointer">Join</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[11px] text-gray-500 font-mono tracking-widest uppercase">
+                    &copy; 2026 DevFlow Labs. All Rights Reserved.
+                </p>
+                
+                <div class="flex items-center gap-2 text-green-400 text-xs font-bold bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20 cursor-pointer hover:bg-green-500/20 transition-colors" onclick="showToast('✅ All DevFlow AI servers are running perfectly at 99.99% uptime!')">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                    </span>
+                    All Systems Operational
+                </div>
+
+                <p class="text-[11px] text-gray-500 font-mono tracking-widest uppercase">
+                    Crafted with <i class="fas fa-heart text-red-500 animate-pulse mx-1"></i> by <span class="text-white font-bold">DevFlow Team</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="authModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex justify-center items-center p-4 animate-fade-in overflow-y-auto">
+        <div class="glass-panel rounded-3xl max-w-md w-full border border-violet-500/30 relative overflow-hidden p-6 md:p-8 shadow-2xl shadow-violet-500/20 my-auto">
+            <button onclick="closeModal('authModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer z-10"><i class="fas fa-times text-xl"></i></button>
+            
+            <div id="authMainView" class="block">
+                <div class="text-center mb-6 mt-2">
+                    <div class="bg-gradient-to-br from-violet-600 to-blue-500 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4"><i class="fas fa-user-circle text-white text-2xl"></i></div>
+                    <h2 class="text-xl md:text-2xl font-bold mb-2">Create Account</h2>
+                    <p class="text-gray-400 text-xs md:text-sm">Sign up or Log in to continue.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="loginWithGoogle()" class="w-full bg-white text-black font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-200 transition-all shadow-lg text-sm">
+                        <i class="fab fa-google text-red-500 text-lg"></i> Continue with Google
+                    </button>
+                    <button onclick="showAuthView('authMobileView')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-500 transition-all shadow-lg text-sm">
+                        <i class="fas fa-phone-alt text-lg"></i> Continue with Mobile
+                    </button>
+                </div>
+                
+                <div class="flex items-center my-5">
+                    <div class="flex-grow border-t border-white/10"></div>
+                    <span class="px-3 text-gray-500 text-[10px] font-bold uppercase tracking-widest">Or email</span>
+                    <div class="flex-grow border-t border-white/10"></div>
+                </div>
+
+                <button onclick="showAuthView('authEmailView')" class="w-full bg-white/5 border border-white/10 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all text-sm">
+                    <i class="fas fa-envelope"></i> Continue with Email
+                </button>
+            </div>
+
+            <div id="authMobileView" class="hidden">
+                <button onclick="showAuthView('authMainView')" class="text-gray-400 hover:text-white text-sm mb-4"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                <div class="text-center mb-6">
+                    <div class="bg-blue-600/20 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fas fa-phone-alt text-blue-500 text-xl"></i></div>
+                    <h2 class="text-xl font-bold mb-1">Enter your phone number</h2>
+                    <p class="text-gray-400 text-xs">We will send you an OTP.</p>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" value="+91" disabled class="w-16 input-field p-3 rounded-xl text-center text-sm font-bold bg-white/5">
+                    <input type="number" id="mobileNumberInput" placeholder="9876543210" class="flex-grow input-field p-3 rounded-xl text-sm" maxlength="10">
+                </div>
+                <div id="recaptcha-container" class="flex justify-center mb-4"></div>
+                <button onclick="sendRealOtp()" class="btn-magic w-full py-3.5 rounded-xl text-white font-bold shadow-lg">Send OTP</button>
+            </div>
+
+            <div id="authOtpView" class="hidden">
+                <button onclick="showAuthView('authMobileView')" class="text-gray-400 hover:text-white text-sm mb-4"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold mb-1">Verify Phone</h2>
+                    <p class="text-gray-400 text-xs">Code sent to <span id="displayMobileText" class="text-white font-bold"></span></p>
+                </div>
+                <input type="number" id="otpInput" placeholder="Enter OTP" class="w-full input-field p-3 rounded-xl text-center text-lg font-mono tracking-widest mb-4" maxlength="6">
+                <button onclick="verifyRealOtp()" class="bg-blue-600 hover:bg-blue-500 w-full py-3.5 rounded-xl text-white font-bold shadow-lg transition-all">Verify & Login</button>
+            </div>
+
+            <div id="authEmailView" class="hidden">
+                <button onclick="showAuthView('authMainView')" class="text-gray-400 hover:text-white text-sm mb-4"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold mb-1">Email Auth</h2>
+                    <p class="text-gray-400 text-xs">We will automatically log you in or create a new account.</p>
+                </div>
+                <form onsubmit="handleEmailLogin(event)" class="space-y-4">
+                    <input type="text" id="loginName" required placeholder="Full Name" class="input-field p-3 rounded-xl w-full text-white bg-black/60 focus:border-violet-500 outline-none text-sm">
+                    <input type="email" id="loginEmail" required placeholder="Email Address" class="input-field p-3 rounded-xl w-full text-white bg-black/60 focus:border-violet-500 outline-none text-sm">
+                    <input type="password" id="loginPassword" required placeholder="Password" minlength="6" class="input-field p-3 rounded-xl w-full text-white bg-black/60 focus:border-violet-500 outline-none text-sm">
+                    <button type="submit" class="btn-magic w-full py-3.5 rounded-xl text-white font-bold mt-2 shadow-lg shadow-violet-500/30 text-sm">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="billingModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex justify-center items-center p-4 animate-fade-in">
+        <div class="glass-panel rounded-3xl max-w-4xl w-full border-t-4 border-yellow-400 relative overflow-hidden p-2">
+            <button onclick="closeModal('billingModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer z-20"><i class="fas fa-times text-xl"></i></button>
+            <div class="bg-[#050810] rounded-2xl w-full h-full flex flex-col md:flex-row overflow-hidden">
+                <div class="w-full md:w-1/2 p-8 md:p-10 bg-gradient-to-br from-violet-900/20 to-black border-r border-white/5 flex flex-col justify-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold mb-4 text-white">DevFlow <span class="text-yellow-400">Pro</span></h2>
+                    <p class="text-gray-400 text-sm mb-8">Support the developer and get unlimited everything forever.</p>
+                    <ul class="space-y-4 text-sm text-gray-300 font-medium">
+                        <li class="flex items-center gap-3"><i class="fas fa-check-circle text-green-400 text-lg"></i> <b>Unlimited Daily Credits</b> for everyone!</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check-circle text-green-400 text-lg"></i> AI Security Auditor & Code Reviewer</li>
+                        <li class="flex items-center gap-3"><i class="fas fa-check-circle text-green-400 text-lg"></i> AI Flowchart & UI Generators</li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center items-center text-center relative">
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs mb-2">Lifetime Access</p>
+                    <div class="flex items-end justify-center gap-2 mb-8">
+                        <span class="text-gray-500 text-2xl line-through decoration-red-500">₹999</span>
+                        <span class="text-5xl font-extrabold text-white">₹149</span>
+                    </div>
+                    <button onclick="window.open('https://razorpay.com/', '_blank')" class="w-full py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-extrabold text-lg shadow-[0_10px_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform flex justify-center items-center gap-2">
+                        <i class="fas fa-lock"></i> Donate / Upgrade
+                    </button>
+                    <p class="text-[10px] text-gray-600 mt-6 underline cursor-pointer hover:text-white" onclick="simulatePaymentSuccess()">[Demo] Simulate Payment Success</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="accountModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex justify-center items-center p-4 animate-fade-in">
+        <div class="glass-panel rounded-3xl max-w-sm w-full border-t-4 border-blue-500 relative overflow-hidden p-6 md:p-8 shadow-2xl shadow-blue-500/20">
+            <button onclick="closeModal('accountModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer"><i class="fas fa-times text-xl"></i></button>
+            <div class="mb-6 flex flex-col items-center border-b border-white/10 pb-6 text-center mt-2">
+                <img id="accountProfilePic" src="https://ui-avatars.com/api/?name=User&background=random&color=fff" class="w-20 h-20 rounded-full shadow-lg border-2 border-blue-500 mb-3 object-cover" alt="Profile">
+                <h2 class="text-xl font-bold text-white" id="accountNameText">Developer</h2>
+                <p class="text-xs text-gray-400 mt-1" id="accountPlanText">Hustler Plan (Free)</p>
+            </div>
+            <div class="space-y-3">
+                <div class="bg-blue-900/10 border border-blue-500/20 p-4 rounded-xl text-center mb-4">
+                    <h3 class="text-sm font-bold text-blue-400 mb-1">Available Credits</h3>
+                    <p class="text-2xl font-extrabold text-white" id="accountCreditText">1000</p>
+                </div>
+                <button id="accountUpgradeBtn" onclick="closeModal('accountModal'); showModal('billingModal')" class="btn-magic bg-gradient-to-r from-yellow-500 to-orange-500 w-full py-3 rounded-xl text-black font-extrabold shadow-lg">
+                    Upgrade to PRO <i class="fas fa-crown ml-1"></i>
+                </button>
+                <button onclick="handleLogout()" class="w-full py-3 rounded-xl border border-red-500/30 text-red-500 font-bold hover:bg-red-500/10 transition-all flex justify-center items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="apiModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 animate-fade-in">
+        <div class="glass-panel rounded-2xl max-w-2xl w-full border-t-4 border-blue-500 relative">
+            <button onclick="closeModal('apiModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer"><i class="fas fa-times text-xl"></i></button>
+            <div class="p-6 md:p-8">
+                <h2 class="text-xl md:text-2xl font-bold mb-2 flex items-center"><i class="fas fa-code text-blue-400 mr-3"></i>DevFlow API Documentation</h2>
+                <p class="text-sm text-gray-400">Integrate DevFlow's intelligence directly into your own applications.</p>
+                <div class="bg-black/60 p-4 rounded-xl border border-white/5 overflow-x-auto mb-6 mt-4">
+                    <pre><code class="language-javascript text-xs md:text-sm text-blue-300">fetch('https://api.devflow.io/v1/generate', {
+  method: 'POST',
+  headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
+  body: JSON.stringify({ prompt: "Hello World" })
+})</code></pre>
+                </div>
+                <button onclick="closeModal('apiModal')" class="w-full py-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 transition-all font-semibold cursor-pointer">Close Documentation</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tutorialModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex justify-center items-center p-4 animate-fade-in">
+        <div class="glass-panel rounded-2xl max-w-lg w-full border-t-4 border-purple-500 relative p-8 text-center">
+            <button onclick="closeModal('tutorialModal')" class="absolute top-4 right-4 text-gray-400 hover:text-white cursor-pointer"><i class="fas fa-times text-xl"></i></button>
+            <i class="fas fa-laptop-code text-5xl text-purple-500 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-2 text-white">Video Tutorials</h2>
+            <p class="text-gray-400 text-sm mb-6">We are currently recording high-quality masterclasses for all DevFlow Pro tools. They will be available here soon!</p>
+            <button onclick="closeModal('tutorialModal')" class="btn-magic py-2 px-8 rounded-lg text-white font-bold">Got it!</button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-[9999] flex flex-col items-center pointer-events-none"></div>
+
+    <script>
+        const DEFAULT_API_KEY = 'AIzaSyCj_qG5CYOYqDN4GN1ltToh9GtzDsCNwSQ'; 
+        
+        // ==========================================
+        // 🔥 REAL FIREBASE AUTHENTICATION LOGIC 🔥
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmVJpMOeHhJPWVWFwz_rNmZAyRnPEIuvE",
+            authDomain: "devflowai-254dd.firebaseapp.com",
+            projectId: "devflowai-254dd",
+            storageBucket: "devflowai-254dd.firebasestorage.app",
+            messagingSenderId: "964918966500",
+            appId: "1:964918966500:web:bb4a795f40dd0db30c54f1",
+            measurementId: "G-GKZX4XN024"
+        };
+
+        let auth;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            auth = firebase.auth();
+        } catch(e) {
+            console.error("Firebase init error", e);
+        }
+
+        // 1. REAL GOOGLE LOGIN
+        function loginWithGoogle() {
+            if(!auth) return showToast("Firebase loading... please wait.");
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then((result) => {
+                const user = result.user;
+                handleRealLoginSuccess(user.displayName, user.email, user.photoURL);
+            }).catch((error) => {
+                showToast('Google Sign In Error: ' + error.message);
+            });
+        }
+
+        // 2. REAL MOBILE OTP - SEND
+        function sendRealOtp() {
+            let num = document.getElementById('mobileNumberInput').value;
+            if(num.length < 10) return showToast('Please enter a valid 10-digit number.');
+            if(!auth) return showToast("Firebase loading...");
+
+            if(!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'normal' });
+            }
+            
+            const phoneNumber = "+91" + num;
+            auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+                .then((confirmationResult) => {
+                    window.confirmationResult = confirmationResult;
+                    document.getElementById('displayMobileText').innerText = phoneNumber;
+                    showAuthView('authOtpView');
+                    showToast('Real OTP Sent successfully!');
+                }).catch((error) => {
+                    showToast('SMS Error. Retrying might require refreshing page.');
+                    console.error(error);
+                });
+        }
+
+        // 3. REAL MOBILE OTP - VERIFY
+        function verifyRealOtp() {
+            let otp = document.getElementById('otpInput').value;
+            if(otp.length < 4) return showToast('Enter valid OTP.');
+            if(!window.confirmationResult) return showToast("Please send OTP first.");
+
+            window.confirmationResult.confirm(otp).then((result) => {
+                const user = result.user;
+                handleRealLoginSuccess("Phone User", user.phoneNumber, "");
+            }).catch((error) => {
+                showToast('Invalid OTP entered.');
+            });
+        }
+
+        // 4. REAL EMAIL/PASSWORD LOGIN (Smart Flow)
+        function handleEmailLogin(e) {
+            e.preventDefault();
+            let name = document.getElementById('loginName').value || 'User';
+            let email = document.getElementById('loginEmail').value;
+            let pass = document.getElementById('loginPassword').value;
+
+            if(!auth) return showToast("Firebase loading...");
+
+            // Try to Login first
+            auth.signInWithEmailAndPassword(email, pass)
+            .then((userCredential) => {
+                handleRealLoginSuccess(userCredential.user.displayName || name, userCredential.user.email, userCredential.user.photoURL);
+            })
+            .catch((error) => {
+                // If user doesn't exist, create account automatically
+                auth.createUserWithEmailAndPassword(email, pass)
+                .then((userCredential) => {
+                    userCredential.user.updateProfile({ displayName: name });
+                    handleRealLoginSuccess(name, email, null);
+                })
+                .catch((err) => showToast(err.message));
+            });
+        }
+
+        // SUCCESS HANDLER
+        function handleRealLoginSuccess(name, email, photoUrl) {
+            localStorage.setItem('devflow_user_name', name);
+            localStorage.setItem('devflow_user_email', email);
+            if(photoUrl) localStorage.setItem('devflow_user_photo', photoUrl);
+            
+            localStorage.setItem('devflow_logged_in', 'true');
+            closeModal('authModal');
+            updateUIState();
+            showToast(`Welcome back, ${name}! 🚀`);
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('devflow_logged_in');
+            localStorage.removeItem('devflow_user_email');
+            localStorage.removeItem('devflow_user_name');
+            localStorage.removeItem('devflow_user_photo');
+            localStorage.removeItem('devflow_is_premium');
+            if(auth) auth.signOut(); 
+            location.reload(); 
+        }
+
+        // ==========================================
+
+        let currentRawText = "";
+        let chatHistoryContext = []; 
+
+        function getApiKey() { return DEFAULT_API_KEY; }
+
+        function showToast(message) {
+            let toast = document.createElement('div');
+            toast.className = "bg-teal-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center min-w-max mb-2 transition-opacity duration-300 opacity-0 transform translate-y-4 pointer-events-auto";
+            toast.innerHTML = `<i class="fas fa-info-circle mr-3"></i><span class="text-sm font-semibold">${message}</span>`;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { toast.classList.remove('opacity-0', 'translate-y-4'); }, 10);
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-4'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function updateCreditDisplay() {
+            let isPremium = localStorage.getItem('devflow_is_premium') === 'true';
+            let crEl = document.getElementById('creditCount');
+            let labelEl = document.getElementById('creditLabel');
+            let accCrEl = document.getElementById('accountCreditText');
+            
+            let today = new Date().toLocaleDateString();
+            let savedDate = localStorage.getItem('devflow_gen_date');
+            let dailyCount = parseInt(localStorage.getItem('devflow_daily_count')) || 0;
+            
+            if(savedDate !== today) { dailyCount = 0; }
+            let left = 1000 - dailyCount; 
+            
+            if(crEl) crEl.innerText = isPremium ? "Unlimited" : (left > 0 ? left : 0);
+            if(accCrEl) accCrEl.innerText = isPremium ? "Unlimited" : (left > 0 ? left : 0);
+            if(labelEl) labelEl.innerText = isPremium ? "Access" : "Daily Limits";
+        }
+
+        function checkAuth() {
+            if (localStorage.getItem('devflow_is_premium') === 'true') return true;
+            let today = new Date().toLocaleDateString();
+            let savedDate = localStorage.getItem('devflow_gen_date');
+            let dailyCount = parseInt(localStorage.getItem('devflow_daily_count')) || 0;
+
+            if (savedDate !== today) { dailyCount = 0; localStorage.setItem('devflow_gen_date', today); }
+            if (dailyCount >= 1000) { showModal('billingModal'); showToast('1000 Credits exhausted!'); return false; } 
+
+            dailyCount++;
+            localStorage.setItem('devflow_daily_count', dailyCount);
+            updateCreditDisplay();
+            return true;
+        }
+
+        function resetAndShowAuth() {
+            showAuthView('authMainView');
+            showModal('authModal');
+        }
+
+        function showAuthView(viewId) {
+            const views = ['authMainView', 'authGoogleView', 'authMobileView', 'authOtpView', 'authEmailView'];
+            views.forEach(v => {
+                let el = document.getElementById(v);
+                if(el) el.classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        function simulatePaymentSuccess() {
+            localStorage.setItem('devflow_is_premium', 'true');
+            closeModal('billingModal');
+            updateUIState();
+            showToast('🎉 Payment Successful! Welcome to PRO.');
+        }
+
+        function updateUIState() {
+            let isLoggedIn = localStorage.getItem('devflow_logged_in') === 'true';
+            let isPremium = localStorage.getItem('devflow_is_premium') === 'true';
+            
+            let loginBtn = document.getElementById('loginBtnNav');
+            let profileBtn = document.getElementById('profileBtnNav');
+            let upgradeBtn = document.getElementById('upgradeBtnNav');
+            let accUpgradeBtn = document.getElementById('accountUpgradeBtn');
+            let mUpgradeBtn = document.getElementById('mobileMenuUpgradeContainer');
+
+            if(isLoggedIn) {
+                if(loginBtn) loginBtn.classList.add('hidden');
+                if(profileBtn) profileBtn.classList.remove('hidden');
+
+                let name = localStorage.getItem('devflow_user_name') || 'User';
+                let email = localStorage.getItem('devflow_user_email') || 'user@devflow.ai';
+                let savedPhoto = localStorage.getItem('devflow_user_photo');
+                
+                let avatarUrl = savedPhoto ? savedPhoto : `https://ui-avatars.com/api/?name=${name}&background=8b5cf6&color=fff&bold=true`;
+                
+                let navPic = document.getElementById('navProfilePic');
+                let accPic = document.getElementById('accountProfilePic');
+                let accName = document.getElementById('accountNameText');
+                
+                if(navPic) navPic.src = avatarUrl;
+                if(accPic) accPic.src = avatarUrl;
+                if(accName) accName.innerText = name; 
+            } else {
+                if(loginBtn) loginBtn.classList.remove('hidden');
+                if(profileBtn) profileBtn.classList.add('hidden');
+            }
+
+            if(isPremium) {
+                let pStat = document.getElementById('accountPlanText');
+                if(pStat) { pStat.innerText = "Enterprise Pro 👑"; pStat.classList.replace('text-gray-400', 'text-yellow-400'); }
+                if(upgradeBtn) upgradeBtn.classList.add('hidden'); 
+                if(accUpgradeBtn) accUpgradeBtn.classList.add('hidden'); 
+                if(mUpgradeBtn) mUpgradeBtn.classList.add('hidden'); 
+            } else {
+                if(upgradeBtn) upgradeBtn.classList.remove('hidden');
+                if(accUpgradeBtn) accUpgradeBtn.classList.remove('hidden');
+                if(mUpgradeBtn) mUpgradeBtn.classList.remove('hidden');
+            }
+            updateCreditDisplay();
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            if(!menu || !overlay) return;
+            if (menu.classList.contains('-translate-x-full')) {
+                menu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                menu.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0'); setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+
+        function switchTabMobile(tabId, toolId = null) {
+            toggleMobileMenu();
+            if(toolId) openSpecificTool(tabId, toolId); else switchTab(tabId);
+        }
+
+        window.onload = function() {
+            if(!localStorage.getItem('devflow_gen_date')) localStorage.setItem('devflow_gen_date', new Date().toLocaleDateString());
+            updateUIState();
+            const chatInput = document.getElementById('chatInput');
+            if(chatInput) { chatInput.addEventListener('input', function() { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; }); }
+        };
+
+        marked.setOptions({ highlight: function(code, lang) { if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value; return hljs.highlightAuto(code).value; }, breaks: true });
+
+        function switchTab(tabId, event) {
+            if(event) event.preventDefault(); 
+            const views = ['dashboard', 'protools', 'ultra', 'chat'];
+            views.forEach(v => { let el = document.getElementById('view-' + v); if(el) el.classList.add('hidden'); });
+            let targetEl = document.getElementById('view-' + tabId); if(targetEl) targetEl.classList.remove('hidden');
+            
+            const navs = ['nav-dashboard', 'nav-chat', 'nav-protools', 'nav-ultra'];
+            navs.forEach(n => {
+                const el = document.getElementById(n);
+                if(el) {
+                    el.classList.remove('text-white', 'border-b-2', 'border-violet-500', 'border-red-500', 'border-blue-500');
+                    if(n === 'nav-ultra' && tabId === 'ultra') el.classList.add('text-white', 'border-b-2', 'border-red-500');
+                    else if(n === 'nav-protools' && tabId === 'protools') el.classList.add('text-white', 'border-b-2', 'border-yellow-500');
+                    else if(n === 'nav-chat' && tabId === 'chat') el.classList.add('text-white', 'border-b-2', 'border-blue-500');
+                    else if(n === 'nav-dashboard' && tabId === 'dashboard') el.classList.add('text-white', 'border-b-2', 'border-violet-500');
+                    else el.classList.add('text-gray-500');
+                }
+            });
+            
+            let header = document.getElementById('header-title');
+            if(header) {
+                if(tabId === 'dashboard') header.style.display = 'block';
+                else header.style.display = 'none';
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function openSpecificTool(tab, toolId, event) {
+            if(event) event.preventDefault(); switchTab(tab); 
+            setTimeout(() => { const el = document.getElementById(toolId); if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        }
+
+        function showModal(modalId, event) { if(event) event.preventDefault(); let el = document.getElementById(modalId); if(el) el.classList.remove('hidden'); }
+        function closeModal(modalId) { let el = document.getElementById(modalId); if(el) el.classList.add('hidden'); }
+
+        async function generateWithAI() {
+            if(!checkAuth()) return; 
+            const n = document.getElementById('pName') ? document.getElementById('pName').value : 'Project';
+            const s = document.getElementById('pStack') ? document.getElementById('pStack').value : '';
+            const f = document.getElementById('pFeatures') ? document.getElementById('pFeatures').value : '';
+            const docType = document.getElementById('docType') ? document.getElementById('docType').value : 'README';
+            const prompt = `Act as an IT Consultant. Write a ${docType} for "${n}". Stack: ${s}. Features: ${f}. Format beautifully in Markdown.`;
+            
+            let loader = document.getElementById('loader'); if(loader) loader.classList.remove('hidden');
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if(data.error) showToast(data.error.message);
+                else {
+                    currentRawText = data.candidates[0].content.parts[0].text;
+                    let outRaw = document.getElementById('outputRaw'); if(outRaw) outRaw.value = currentRawText;
+                    let outPre = document.getElementById('outputPreview'); if(outPre) outPre.innerHTML = marked.parse(currentRawText);
+                }
+            } catch (e) { showToast("API Error. Check internet."); } 
+            finally { if(loader) loader.classList.add('hidden'); }
+        }
+
+        function fillChat(msg) { const input = document.getElementById('chatInput'); if(input) { input.value = msg; input.focus(); } }
+
+        function clearChat() {
+            let chatBox = document.getElementById('chatBox');
+            if(chatBox) chatBox.innerHTML = `<div class="flex items-start gap-3 md:gap-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg border border-white/20"><i class="fas fa-layer-group text-white text-xs md:text-sm"></i></div><div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-3 md:p-4 max-w-[90%] md:max-w-[75%] text-sm text-gray-200 leading-relaxed shadow-lg">Chat memory cleared! Ready for new instructions.</div></div>`;
+            chatHistoryContext = [];
+        }
+
+        async function sendMessage() {
+            if(!checkAuth()) return;
+            const inputEl = document.getElementById('chatInput'); if(!inputEl) return;
+            const message = inputEl.value.trim(); if(!message) return;
+            
+            let name = localStorage.getItem('devflow_user_name') || 'User';
+            let savedPhoto = localStorage.getItem('devflow_user_photo');
+            let avatarUrl = savedPhoto ? savedPhoto : `https://ui-avatars.com/api/?name=${name}&background=8b5cf6&color=fff&bold=true`;
+            let isLog = localStorage.getItem('devflow_logged_in') === 'true';
+            let profileHtml = isLog ? `<img src="${avatarUrl}" class="w-full h-full rounded-full">` : `<div class="text-[10px] font-bold text-white">U</div>`;
+
+            const chatBox = document.getElementById('chatBox'); if(!chatBox) return;
+            chatBox.innerHTML += `<div class="flex items-start gap-3 md:gap-4 justify-end animate-fade-in mt-4"><div class="bg-blue-600/20 border border-blue-500/30 rounded-2xl rounded-tr-none p-3 md:p-4 max-w-[90%] md:max-w-[75%] text-sm text-gray-100 shadow-md">${message.replace(/\n/g, '<br>')}</div><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">${profileHtml}</div></div>`;
+            inputEl.value = ''; inputEl.style.height = 'auto'; chatBox.scrollTop = chatBox.scrollHeight;
+            
+            const typingId = 'typing-' + Date.now();
+            chatBox.innerHTML += `<div id="${typingId}" class="flex items-start gap-3 md:gap-4 animate-fade-in mt-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg"><i class="fas fa-robot text-white text-xs md:text-sm"></i></div><div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-3 md:p-4 text-sm text-gray-400 flex items-center gap-2 shadow-md"><i class="fas fa-circle text-[6px] animate-bounce"></i><i class="fas fa-circle text-[6px] animate-bounce" style="animation-delay: 0.2s"></i></div></div>`;
+            chatBox.scrollTop = chatBox.scrollHeight; chatHistoryContext.push({ role: "user", parts: [{ text: message }] });
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: chatHistoryContext, systemInstruction: { parts: [{text: "You are DevFlow AI, a helpful IT assistant. Answer in markdown."}] }})
+                });
+                const data = await response.json(); 
+                let typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
+                
+                if(data.error) { chatBox.innerHTML += `<div class="text-red-500 text-center text-xs my-2">Error: ${data.error.message}</div>`; chatHistoryContext.pop(); } 
+                else {
+                    const aiText = data.candidates[0].content.parts[0].text; chatHistoryContext.push({ role: "model", parts: [{ text: aiText }] });
+                    chatBox.innerHTML += `<div class="flex items-start gap-3 md:gap-4 animate-fade-in mt-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg"><i class="fas fa-robot text-white text-xs md:text-sm"></i></div><div class="chat-md md-preview bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-4 max-w-[95%] md:max-w-[85%] text-sm text-gray-200 overflow-x-auto shadow-md">${marked.parse(aiText)}</div></div>`;
+                }
+            } catch (e) { let tEl = document.getElementById(typingId); if(tEl) tEl.remove(); chatHistoryContext.pop(); showToast("Network Error"); }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function callProGemini(prompt, outputElementId) {
+            if(!checkAuth()) return; 
+            const outputEl = document.getElementById(outputElementId);
+            if(outputEl) outputEl.innerHTML = '<div class="flex items-center text-violet-400 py-4"><i class="fas fa-circle-notch fa-spin mr-3 text-xl"></i> AI is processing...</div>';
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                if(outputEl) {
+                    if(data.error) outputEl.innerHTML = `<span class="text-red-500">Error: ${data.error.message}</span>`;
+                    else outputEl.innerHTML = marked.parse(data.candidates[0].content.parts[0].text);
+                }
+            } catch (e) { if(outputEl) outputEl.innerHTML = '<span class="text-red-500">Connection Error.</span>'; }
+        }
+
+        function translateCode() { const c=document.getElementById('codeToTranslate').value; if(!c) return showToast("Paste code!"); callProGemini(`Translate this to ${document.getElementById('langTo').value}. Code:\n${c}`, 'translateOutput'); }
+        function fixError() { const e=document.getElementById('errorInput').value; if(!e) return showToast("Paste error!"); callProGemini(`Analyze and fix error: \n"${e}"`, 'errorOutput'); }
+        function generateSecurityAudit() { const c=document.getElementById('securityInput').value; if(!c) return showToast("Paste code"); callProGemini(`Security Audit this code:\n${c}`, 'securityOutput'); }
+        function generatePostmanDocs() { callProGemini(`Create Postman Docs for: Base URL: ${document.getElementById('apiBaseUrl').value}, Endpoints: ${document.getElementById('apiEndpoints').value}`, 'postmanOutput'); }
+        function generateResume() { const r=document.getElementById('resRole').value||'Dev', e=document.getElementById('resExp').value, s=document.getElementById('resSkills').value||'', p=document.getElementById('resProjects').value||''; callProGemini(`Create ATS Resume: Role: ${r}, Exp: ${e}, Skills: ${s}, Projects: ${p}`, 'resumeOutput'); }
+        function generateInterview() { const r=document.getElementById('intRole').value||'Software Engineer', c=document.getElementById('intCompany').value||'Tech Company'; callProGemini(`Interview Prep Sheet for ${r} at ${c}. Include Tech & HR questions.`, 'interviewOutput'); }
+        
+        function generateDiagram() { 
+            if(!checkAuth()) return; 
+            const t=document.getElementById('diagramTopic'); if(!t || !t.value) return showToast("Enter topic."); 
+            let container = document.getElementById('diagramOutputContainer'); if(container) container.classList.remove('hidden'); 
+            let outputEl = document.getElementById('ultraDiagramOutput'); if(outputEl) outputEl.innerHTML = 'Loading...'; 
+            fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: `Generate Mermaid.js diagram for: "${t.value}". ONLY raw Mermaid code block.` }] }] }) }).then(res => res.json()).then(data => { if(outputEl) { let cleanMermaid = data.candidates[0].content.parts[0].text.replace(/```mermaid\n?/gi, '').replace(/```/g, '').trim(); outputEl.innerHTML = `<div class="mermaid">${cleanMermaid}</div>`; mermaid.init(undefined, document.querySelectorAll('.mermaid')); } }); 
+        }
+
+        function generateUltraSQL() { const d=document.getElementById('ultraDb').value, g=document.getElementById('ultraGoal').value, s=document.getElementById('ultraSchema').value; if(!g||!s) return showToast("Provide Schema and Goal."); callProGemini(`Act as Database Admin. DB: ${d}. Schema: "${s}". Goal: "${g}". Write optimized query. Provide ONLY code in markdown block.`, 'ultraSqlOutput'); }
+
+        function copyOutput(e) { if(!currentRawText) {showToast("Nothing to copy!"); return;} navigator.clipboard.writeText(currentRawText); showToast("Copied to clipboard!"); }
+        function downloadMD() { if(!currentRawText) {showToast("No document!"); return;} const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([currentRawText], { type: 'text/markdown' })); a.download = 'Doc.md'; a.click(); }
+        function downloadPDF() { if(!currentRawText) {showToast("No document!"); return;} const el = document.getElementById('pdf-container'); if(el) { el.classList.add('printing'); html2pdf().set({ margin: 10, filename: 'DevFlow.pdf', html2canvas: { scale: 2, backgroundColor: '#0b0f19' }}).from(el).save().then(() => el.classList.remove('printing')); } }
+    </script>
+</body>
+</html>
