@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevLoomAi</title>
     
-    <link rel="icon" href="https://ui-avatars.com/api/?name=DF&background=8b5cf6&color=fff&rounded=true&bold=true" type="image/x-icon">
+    <link rel="icon" href="https://ui-avatars.com/api/?name=DL&background=8b5cf6&color=fff&rounded=true&bold=true" type="image/x-icon">
 
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
@@ -152,7 +152,7 @@
             <i class="fas fa-bolt text-yellow-400"></i> Powered by DevLoom Ai
         </div>
         <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
-           DevLoom<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">AI</span>
+            DevLoom<span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">AI</span>
         </h1>
         <p class="text-gray-400 text-sm font-light max-w-xl mx-auto">AI Documentation Suite: Premium Code READMEs, Persuasive Proposals & Specs.</p>
     </div>
@@ -334,7 +334,7 @@
                 <div class="lg:col-span-4 space-y-6">
                     <div class="flex items-center gap-3">
                         <div class="bg-gradient-to-br from-violet-600 to-indigo-600 w-10 h-10 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)]"><i class="fas fa-layer-group text-white text-sm"></i></div>
-                        <span class="text-2xl font-extrabold text-white tracking-tight">DevLoom Ai<span class="text-violet-400">.ai</span></span>
+                        <span class="text-2xl font-extrabold text-white tracking-tight">DevLoom<span class="text-violet-400">.ai</span></span>
                     </div>
                     <p class="text-sm text-gray-400 leading-relaxed pr-4">The ultimate AI co-pilot for developers. Build architectures, write clean code, and debug faster than ever before. Welcome to the future of coding.</p>
                     <div class="flex items-center gap-4 pt-2">
@@ -495,7 +495,7 @@
                 <h2 class="text-xl md:text-2xl font-bold mb-2 flex items-center"><i class="fas fa-code text-blue-400 mr-3"></i>DevLoom Ai API Documentation</h2>
                 <p class="text-sm text-gray-400">Integrate DevLoom Ai's intelligence directly into your own applications.</p>
                 <div class="bg-black/60 p-4 rounded-xl border border-white/5 overflow-x-auto mb-6 mt-4">
-                    <pre><code class="language-javascript text-xs md:text-sm text-blue-300">fetch('https://api.devflow.io/v1/generate', {
+                    <pre><code class="language-javascript text-xs md:text-sm text-blue-300">fetch('https://api.devloom.io/v1/generate', {
   method: 'POST',
   headers: { 'Authorization': 'Bearer YOUR_API_KEY' },
   body: JSON.stringify({ prompt: "Hello World" })
@@ -544,7 +544,6 @@
             console.error("Firebase init error", e);
         }
 
-        // 1. REAL GOOGLE LOGIN
         function loginWithGoogle() {
             if(!auth) return showToast("Firebase loading... please wait.");
             const provider = new firebase.auth.GoogleAuthProvider();
@@ -556,7 +555,6 @@
             });
         }
 
-        // 2. REAL EMAIL/PASSWORD LOGIN (Smart Flow)
         function handleEmailLogin(e) {
             e.preventDefault();
             let name = document.getElementById('loginName').value || 'User';
@@ -579,14 +577,11 @@
             });
         }
 
-        // SUCCESS HANDLER
         function handleRealLoginSuccess(name, email, photoUrl) {
             localStorage.setItem('devflow_user_name', name);
             localStorage.setItem('devflow_user_email', email);
             if(photoUrl) localStorage.setItem('devflow_user_photo', photoUrl);
-            
             localStorage.setItem('devflow_logged_in', 'true');
-            
             closeModal('authModal');
             updateUIState();
             showToast(`Welcome back, ${name}! 🚀`);
@@ -601,8 +596,6 @@
             if(auth) auth.signOut(); 
             location.reload(); 
         }
-
-        // ==========================================
 
         let currentRawText = "";
         let chatHistoryContext = []; 
@@ -623,14 +616,11 @@
             let crEl = document.getElementById('creditCount');
             let labelEl = document.getElementById('creditLabel');
             let accCrEl = document.getElementById('accountCreditText');
-            
             let today = new Date().toLocaleDateString();
             let savedDate = localStorage.getItem('devflow_gen_date');
             let dailyCount = parseInt(localStorage.getItem('devflow_daily_count')) || 0;
-            
             if(savedDate !== today) { dailyCount = 0; }
             let left = 1000 - dailyCount; 
-            
             if(crEl) crEl.innerText = isPremium ? "Unlimited" : (left > 0 ? left : 0);
             if(accCrEl) accCrEl.innerText = isPremium ? "Unlimited" : (left > 0 ? left : 0);
             if(labelEl) labelEl.innerText = isPremium ? "Access" : "Daily Limits";
@@ -641,27 +631,19 @@
             let today = new Date().toLocaleDateString();
             let savedDate = localStorage.getItem('devflow_gen_date');
             let dailyCount = parseInt(localStorage.getItem('devflow_daily_count')) || 0;
-
             if (savedDate !== today) { dailyCount = 0; localStorage.setItem('devflow_gen_date', today); }
             if (dailyCount >= 1000) { showModal('billingModal'); showToast('1000 Credits exhausted!'); return false; } 
-
             dailyCount++;
             localStorage.setItem('devflow_daily_count', dailyCount);
             updateCreditDisplay();
             return true;
         }
 
-        function resetAndShowAuth() {
-            showAuthView('authMainView');
-            showModal('authModal');
-        }
+        function resetAndShowAuth() { showAuthView('authMainView'); showModal('authModal'); }
 
         function showAuthView(viewId) {
             const views = ['authMainView', 'authEmailView'];
-            views.forEach(v => {
-                let el = document.getElementById(v);
-                if(el) el.classList.add('hidden');
-            });
+            views.forEach(v => { let el = document.getElementById(v); if(el) el.classList.add('hidden'); });
             document.getElementById(viewId).classList.remove('hidden');
         }
 
@@ -675,27 +657,20 @@
         function updateUIState() {
             let isLoggedIn = localStorage.getItem('devflow_logged_in') === 'true';
             let isPremium = localStorage.getItem('devflow_is_premium') === 'true';
-            
             let loginBtn = document.getElementById('loginBtnNav');
             let profileBtn = document.getElementById('profileBtnNav');
             let upgradeBtn = document.getElementById('upgradeBtnNav');
             let accUpgradeBtn = document.getElementById('accountUpgradeBtn');
             let mUpgradeBtn = document.getElementById('mobileMenuUpgradeContainer');
-
             if(isLoggedIn) {
                 if(loginBtn) loginBtn.classList.add('hidden');
                 if(profileBtn) profileBtn.classList.remove('hidden');
-
                 let name = localStorage.getItem('devflow_user_name') || 'User';
-                let email = localStorage.getItem('devflow_user_email') || 'user@devflow.ai';
                 let savedPhoto = localStorage.getItem('devflow_user_photo');
-                
                 let avatarUrl = savedPhoto ? savedPhoto : `https://ui-avatars.com/api/?name=${name}&background=8b5cf6&color=fff&bold=true`;
-                
                 let navPic = document.getElementById('navProfilePic');
                 let accPic = document.getElementById('accountProfilePic');
                 let accName = document.getElementById('accountNameText');
-                
                 if(navPic) navPic.src = avatarUrl;
                 if(accPic) accPic.src = avatarUrl;
                 if(accName) accName.innerText = name; 
@@ -703,7 +678,6 @@
                 if(loginBtn) loginBtn.classList.remove('hidden');
                 if(profileBtn) profileBtn.classList.add('hidden');
             }
-
             if(isPremium) {
                 let pStat = document.getElementById('accountPlanText');
                 if(pStat) { pStat.innerText = "Enterprise Pro 👑"; pStat.classList.replace('text-gray-400', 'text-yellow-400'); }
@@ -750,7 +724,6 @@
             const views = ['dashboard', 'protools', 'ultra', 'chat'];
             views.forEach(v => { let el = document.getElementById('view-' + v); if(el) el.classList.add('hidden'); });
             let targetEl = document.getElementById('view-' + tabId); if(targetEl) targetEl.classList.remove('hidden');
-            
             const navs = ['nav-dashboard', 'nav-chat', 'nav-protools', 'nav-ultra'];
             navs.forEach(n => {
                 const el = document.getElementById(n);
@@ -763,12 +736,8 @@
                     else el.classList.add('text-gray-500');
                 }
             });
-            
             let header = document.getElementById('header-title');
-            if(header) {
-                if(tabId === 'dashboard') header.style.display = 'block';
-                else header.style.display = 'none';
-            }
+            if(header) { if(tabId === 'dashboard') header.style.display = 'block'; else header.style.display = 'none'; }
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
@@ -782,12 +751,12 @@
 
         async function generateWithAI() {
             if(!checkAuth()) return; 
-            const n = document.getElementById('pName') ? document.getElementById('pName').value : 'Project';
-            const s = document.getElementById('pStack') ? document.getElementById('pStack').value : '';
-            const f = document.getElementById('pFeatures') ? document.getElementById('pFeatures').value : '';
-            const docType = document.getElementById('docType') ? document.getElementById('docType').value : 'README';
+            const n = document.getElementById('pName').value;
+            const s = document.getElementById('pStack').value;
+            const f = document.getElementById('pFeatures').value;
+            const docType = document.getElementById('docType').value;
+            if(!n) return showToast("Project name is required!");
             const prompt = `Act as an IT Consultant. Write a ${docType} for "${n}". Stack: ${s}. Features: ${f}. Format beautifully in Markdown.`;
-            
             let loader = document.getElementById('loader'); if(loader) loader.classList.remove('hidden');
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, {
@@ -797,7 +766,6 @@
                 if(data.error) showToast(data.error.message);
                 else {
                     currentRawText = data.candidates[0].content.parts[0].text;
-                    let outRaw = document.getElementById('outputRaw'); if(outRaw) outRaw.value = currentRawText;
                     let outPre = document.getElementById('outputPreview'); if(outPre) outPre.innerHTML = marked.parse(currentRawText);
                 }
             } catch (e) { showToast("API Error. Check internet."); } 
@@ -816,28 +784,23 @@
             if(!checkAuth()) return;
             const inputEl = document.getElementById('chatInput'); if(!inputEl) return;
             const message = inputEl.value.trim(); if(!message) return;
-            
             let name = localStorage.getItem('devflow_user_name') || 'User';
             let savedPhoto = localStorage.getItem('devflow_user_photo');
             let avatarUrl = savedPhoto ? savedPhoto : `https://ui-avatars.com/api/?name=${name}&background=8b5cf6&color=fff&bold=true`;
             let isLog = localStorage.getItem('devflow_logged_in') === 'true';
             let profileHtml = isLog ? `<img src="${avatarUrl}" class="w-full h-full rounded-full">` : `<div class="text-[10px] font-bold text-white">U</div>`;
-
             const chatBox = document.getElementById('chatBox'); if(!chatBox) return;
             chatBox.innerHTML += `<div class="flex items-start gap-3 md:gap-4 justify-end animate-fade-in mt-4"><div class="bg-blue-600/20 border border-blue-500/30 rounded-2xl rounded-tr-none p-3 md:p-4 max-w-[90%] md:max-w-[75%] text-sm text-gray-100 shadow-md">${message.replace(/\n/g, '<br>')}</div><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">${profileHtml}</div></div>`;
             inputEl.value = ''; inputEl.style.height = 'auto'; chatBox.scrollTop = chatBox.scrollHeight;
-            
             const typingId = 'typing-' + Date.now();
             chatBox.innerHTML += `<div id="${typingId}" class="flex items-start gap-3 md:gap-4 animate-fade-in mt-4"><div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg"><i class="fas fa-robot text-white text-xs md:text-sm"></i></div><div class="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none p-3 md:p-4 text-sm text-gray-400 flex items-center gap-2 shadow-md"><i class="fas fa-circle text-[6px] animate-bounce"></i><i class="fas fa-circle text-[6px] animate-bounce" style="animation-delay: 0.2s"></i></div></div>`;
             chatBox.scrollTop = chatBox.scrollHeight; chatHistoryContext.push({ role: "user", parts: [{ text: message }] });
-
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${getApiKey()}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: chatHistoryContext, systemInstruction: { parts: [{text: "You are DevFlowAi, a helpful IT assistant. Answer in markdown."}] }})
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: chatHistoryContext, systemInstruction: { parts: [{text: "You are DevLoom Ai, a helpful IT assistant. Answer in markdown."}] }})
                 });
                 const data = await response.json(); 
                 let typingEl = document.getElementById(typingId); if(typingEl) typingEl.remove();
-                
                 if(data.error) { chatBox.innerHTML += `<div class="text-red-500 text-center text-xs my-2">Error: ${data.error.message}</div>`; chatHistoryContext.pop(); } 
                 else {
                     const aiText = data.candidates[0].content.parts[0].text; chatHistoryContext.push({ role: "model", parts: [{ text: aiText }] });
@@ -882,9 +845,7 @@
 
         function copyOutput(e) { if(!currentRawText) {showToast("Nothing to copy!"); return;} navigator.clipboard.writeText(currentRawText); showToast("Copied to clipboard!"); }
         function downloadMD() { if(!currentRawText) {showToast("No document!"); return;} const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([currentRawText], { type: 'text/markdown' })); a.download = 'Doc.md'; a.click(); }
-        function downloadPDF() { if(!currentRawText) {showToast("No document!"); return;} const el = document.getElementById('pdf-container'); if(el) { el.classList.add('printing'); html2pdf().set({ margin: 10, filename: 'DevFlow.pdf', html2canvas: { scale: 2, backgroundColor: '#0b0f19' }}).from(el).save().then(() => el.classList.remove('printing')); } }
+        function downloadPDF() { if(!currentRawText) {showToast("No document!"); return;} const el = document.getElementById('pdf-container'); if(el) { el.classList.add('printing'); html2pdf().set({ margin: 10, filename: 'DevLoomAi_Doc.pdf', html2canvas: { scale: 2, backgroundColor: '#0b0f19' }}).from(el).save().then(() => el.classList.remove('printing')); } }
     </script>
 </body>
 </html>
-
-
